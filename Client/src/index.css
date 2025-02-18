@@ -1,0 +1,39 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Pastikan padding dan border dihitung dalam lebar elemen */
+}
+
+body, html {
+    width: 100%;
+    height: 100%; /* Menetapkan tinggi tubuh dan HTML ke 100% */
+    font-family: 'McLaren', sans-serif;
+    overflow-x: hidden; /* Menghindari scroll horizontal */
+}
+
+.container {
+    display: grid;
+    grid-template-rows: auto 1fr auto; /* Menentukan 3 baris: header, main, footer */
+    height: 100%; /* Mengatur kontainer untuk mengisi seluruh layar */
+}
+
+header {
+    position: sticky;
+    top: 0;
+    padding: 1rem;
+    width: 100%;
+    text-align: center;
+    z-index: 1000;
+}
+
+main {
+    padding: 2rem;
+    width: 100%;
+    height: 100%;
+}
+
+footer {
+    padding: 1rem;
+    background-color: green;
+    text-align: center;
+}
