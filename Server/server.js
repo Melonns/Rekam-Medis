@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const db = require("../Database/database.js");
-const moment = require("moment"); // pastikan sudah install: npm install moment
+const moment = require("moment");
 
 const app = express();
 const PORT = 3000;
@@ -9,20 +9,19 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
-// Ambil data dari tabel Pasien dengan opsi pencarian berdasarkan nama
+// GET data pasien
 app.get("/data", (req, res) => {
   const searchQuery = req.query.search;
   let sqlQuery = "SELECT * FROM Pasien";
 
   if (searchQuery) {
-    sqlQuery += ` WHERE nama LIKE '%${searchQuery}%'`; // Penyisipan langsung (tidak aman)
-  }else{
-    const oneWeekAgo = moment().subtract(7, 'days').format("YYYY-MM-DD");
+    sqlQuery += ` WHERE nama LIKE '%${searchQuery}%'`;
+  } else {
     const oneMonthAgo = moment().subtract(1, 'months').format("YYYY-MM-DD");
     sqlQuery += ` WHERE tanggal >= '${oneMonthAgo}' ORDER BY tanggal DESC`;
   }
 
-  db.query(sqlQuery, (err, rows) => { // Tanpa queryParams
+  db.query(sqlQuery, (err, rows) => {
     if (err) {
       console.error("Query gagal:", err);
       return res.status(500).json({ error: "Gagal ambil data" });
@@ -31,6 +30,7 @@ app.get("/data", (req, res) => {
   });
 });
 
+// POST data pasien
 app.post("/data", (req, res) => {
   const { nama, tanggal, deskripsi } = req.body;
   const sqlQuery = `INSERT INTO Pasien (nama, tanggal, deskripsi) VALUES ('${nama}', '${tanggal}', '${deskripsi}')`;
@@ -42,9 +42,10 @@ app.post("/data", (req, res) => {
     }
     res.status(201).json({ message: "Data berhasil disimpan" });
   });
-})
+});
 
-app.delete("/data/:id", (req, res) => {
+// DELETE data pasien
+app.delete("/data/delete/:id", (req, res) => {
   const id = req.params.id;
   const sqlQuery = `DELETE FROM Pasien WHERE id = ${id}`;
 
@@ -57,7 +58,7 @@ app.delete("/data/:id", (req, res) => {
   });
 });
 
-app.put("/data/:id", (req, res) => {
+app.put("/data/edit/:id", (req, res) => {
   const id = req.params.id;
   const { nama, tanggal, deskripsi } = req.body;
   const sqlQuery = `UPDATE Pasien SET nama = '${nama}', tanggal = '${tanggal}', deskripsi = '${deskripsi}' WHERE id = ${id}`;
@@ -71,6 +72,7 @@ app.put("/data/:id", (req, res) => {
   });
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`Server berjalan di http://localhost:${PORT}`);
 });

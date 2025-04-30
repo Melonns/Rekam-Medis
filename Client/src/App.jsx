@@ -9,7 +9,7 @@ function App() {
     const [message, setMessage] = useState("");
 
     return (
-        <div className="container">
+        <div className="bg-[#E5E7EB] min-h-screen flex flex-col overflow-x-hidden">
             <Header />
             <Utama />
         </div>
