@@ -20,7 +20,7 @@ function Utama() {
   const fetchData = (query) => {
     console.log("fetchData dipanggil dengan query:", query);
     setLoading(true);
-    fetch(`http://localhost:3000/data?search=${query}`)
+    fetch(`https://server-production-bb65.up.railway.app/data?search=${query}`)
       .then((res) => res.json())
       .then((result) => {
         console.log("Data dari backend:", result);
@@ -51,7 +51,7 @@ function Utama() {
   const handleDelete = (id) => {
     const isConfirmed = window.confirm("Apakah Anda yakin ingin menghapus data ini?");
     if (isConfirmed) {
-      fetch(`http://localhost:3000/data/delete/${id}`, { method: 'DELETE' })
+      fetch(`https://server-production-bb65.up.railway.app/data/delete/${id}`, { method: 'DELETE' })
         .then(res => res.json())
         .then(() => {
           setData(data.filter(item => item.id !== id));
@@ -61,7 +61,7 @@ function Utama() {
   };
 
   const handleUpdate = () => {
-    fetch(`http://localhost:3000/data/edit/${editData.id}`, {
+    fetch(`https://server-production-bb65.up.railway.app/data/edit/${editData.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -92,7 +92,7 @@ function Utama() {
       return;
     }
 
-    fetch("http://localhost:3000/data", {
+    fetch("https://server-production-bb65.up.railway.app/data", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
