@@ -9,6 +9,10 @@ const Card = ({nama, tanggal, deskripsi}) =>{
                 <p>{tanggal}</p>
                 <p>{deskripsi}</p>
             </div>
+            <div>
+                <button className="btn-edit">Edit</button>
+                <button className="btn-delete">Delete</button>
+            </div>
         </div>
     )
 }

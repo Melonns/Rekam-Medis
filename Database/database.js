@@ -1,8 +1,8 @@
 const sql = require('msnodesqlv8');
 
-const connectionString = "server=.;Database=tesdb;Trusted_Connection=Yes;Driver={ODBC Driver 17 for SQL Server}";
-const query = "SELECT * FROM Pasien";
-
-sql.query(connectionString, query, (err, rows) =>{
-    console.log(rows);
-})
+const connectionString = "Server=localhost\\SQLEXPRESS;Database=Rekam_Medis;Trusted_Connection=Yes;Driver={ODBC Driver 17 for SQL Server}";
+module.exports = {
+  query: (sqlQuery, callback) => {
+    sql.query(connectionString, sqlQuery, callback);
+  }
+};
