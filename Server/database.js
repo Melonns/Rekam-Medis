@@ -1,4 +1,4 @@
-const sql = require('msnodesqlv8');
+// const sql = require('msnodesqlv8');
 
 // Ini adalah connection string lokal Anda
 // const connectionString = "Server=localhost\\SQLEXPRESS;Database=Rekam_Medis;Trusted_Connection=Yes;Driver={ODBC Driver 17 for SQL Server}";
