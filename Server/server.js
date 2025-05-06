@@ -31,17 +31,22 @@ app.get("/data", (req, res) => {
 });
 
 // POST data pasien
-app.post("/data", (req, res) => {
-  const { nama, tanggal, deskripsi } = req.body;
-  const sqlQuery = `INSERT INTO Pasien (nama, tanggal, deskripsi) VALUES ('${nama}', '${tanggal}', '${deskripsi}')`;
+// app.post("/data", (req, res) => {
+//   const { nama, tanggal, deskripsi } = req.body;
+//   const sqlQuery = `INSERT INTO Pasien (nama, tanggal, deskripsi) VALUES ('${nama}', '${tanggal}', '${deskripsi}')`;
 
-  db.query(sqlQuery, (err) => {
-    if (err) {
-      console.error("Gagal menyimpan data:", err);
-      return res.status(500).json({ error: "Gagal menyimpan data" });
-    }
-    res.status(201).json({ message: "Data berhasil disimpan" });
-  });
+//   db.query(sqlQuery, (err) => {
+//     if (err) {
+//       console.error("Gagal menyimpan data:", err);
+//       return res.status(500).json({ error: "Gagal menyimpan data" });
+//     }
+//     res.status(201).json({ message: "Data berhasil disimpan" });
+//   });
+// });
+
+app.post("/data", (req, res) => {
+  console.log("Simulasi POST diterima:", req.body);
+  res.status(200).json({ message: "Simulasi OK (tidak disimpan)" });
 });
 
 // DELETE data pasien

@@ -20,7 +20,7 @@ function Utama() {
   const fetchData = (query) => {
     console.log("fetchData dipanggil dengan query:", query);
     setLoading(true);
-    fetch(`https://server-production-bb65.up.railway.app/data?search=${query}`)
+    fetch(`api/data?search=${query}`)
       .then((res) => res.json())
       .then((result) => {
         console.log("Data dari backend:", result);
@@ -51,7 +51,7 @@ function Utama() {
   const handleDelete = (id) => {
     const isConfirmed = window.confirm("Apakah Anda yakin ingin menghapus data ini?");
     if (isConfirmed) {
-      fetch(`https://server-production-bb65.up.railway.app/data/delete/${id}`, { method: 'DELETE' })
+      fetch(`api/data/delete/${id}`, { method: 'DELETE' })
         .then(res => res.json())
         .then(() => {
           setData(data.filter(item => item.id !== id));
@@ -61,7 +61,7 @@ function Utama() {
   };
 
   const handleUpdate = () => {
-    fetch(`https://server-production-bb65.up.railway.app/data/edit/${editData.id}`, {
+    fetch(`api/data/edit/${editData.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -92,7 +92,7 @@ function Utama() {
       return;
     }
 
-    fetch("https://server-production-bb65.up.railway.app/data", {
+    fetch("api/data", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -107,6 +107,7 @@ function Utama() {
     })
     .catch(err => console.error("Gagal tambah data:", err));
   };
+  
 
   return (
     <main className="">

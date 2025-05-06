@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/data': { // Ubah path prefix proxy menjadi /api/data
-        target: 'https://server-production-bb65.up.railway.app',
+        target: 'http://localhost:3000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/data/, '/data'), // Rewrite /api/data menjadi /data
       },
