@@ -18,22 +18,22 @@ app.use(limiter);
 app.use(cors());
 app.use(express.json());
 
-app.on("connection", (socket) => {
-  console.log("🔌 New connection");
-  socket.on("close", () => {
-    console.log("❌ Connection closed");
-  });
-});
+// app.on("connection", (socket) => {
+//   console.log("🔌 New connection");
+//   socket.on("close", () => {
+//     console.log("❌ Connection closed");
+//   });
+// });
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    console.log(`${req.method} ${req.originalUrl} - ${duration}ms`);
-  });
-  next();
-});
-const dns = require('dns');
+// app.use((req, res, next) => {
+//   const start = Date.now();
+//   res.on("finish", () => {
+//     const duration = Date.now() - start;
+//     console.log(`${req.method} ${req.originalUrl} - ${duration}ms`);
+//   });
+//   next();
+// });
+// const dns = require('dns');
 
 // GET data pasien
 app.get("/data", (req, res) => {
@@ -57,44 +57,44 @@ app.get("/data", (req, res) => {
 });
 
 // POST data pasien
-// app.post("/data", (req, res) => {
-//   const { nama, tanggal, deskripsi } = req.body;
-//   const sqlQuery = `INSERT INTO Pasien (nama, tanggal, deskripsi) VALUES ('${nama}', '${tanggal}', '${deskripsi}')`;
+app.post("/data", (req, res) => {
+  const { nama, tanggal, deskripsi } = req.body;
+  const sqlQuery = `INSERT INTO Pasien (nama, tanggal, deskripsi) VALUES ('${nama}', '${tanggal}', '${deskripsi}')`;
 
-//   db.query(sqlQuery, (err) => {
-//     if (err) {
-//       console.error("Gagal menyimpan data:", err);
-//       return res.status(500).json({ error: "Gagal menyimpan data" });
-//     }
-//     res.status(201).json({ message: "Data berhasil disimpan" });
-//   });
-// });
-
-
-
-
-
-app.get('/resolve', (req, res) => {
-  const domain = req.query.domain;
-
-  if (!domain) {
-    return res.status(400).send("Missing domain");
-  }
-
-  dns.lookup(domain, (err, address, family) => {
+  db.query(sqlQuery, (err) => {
     if (err) {
-      // console.error("Failed to resolve:", domain);
-      return res.status(500).send("DNS resolution failed");
+      console.error("Gagal menyimpan data:", err);
+      return res.status(500).json({ error: "Gagal menyimpan data" });
     }
-    res.send(`Resolved IP for ${domain}: ${address}`);
+    res.status(201).json({ message: "Data berhasil disimpan" });
   });
 });
 
 
-app.post("/data", (req, res) => {
-  console.log("Simulasi POST diterima:", req.body);
-  res.status(200).json({ message: "Simulasi OK (tidak disimpan)" });
-});
+
+
+
+// app.get('/resolve', (req, res) => {
+//   const domain = req.query.domain;
+
+//   if (!domain) {
+//     return res.status(400).send("Missing domain");
+//   }
+
+//   dns.lookup(domain, (err, address, family) => {
+//     if (err) {
+//       // console.error("Failed to resolve:", domain);
+//       return res.status(500).send("DNS resolution failed");
+//     }
+//     res.send(`Resolved IP for ${domain}: ${address}`);
+//   });
+// });
+
+
+// app.post("/data", (req, res) => {
+//   console.log("Simulasi POST diterima:", req.body);
+//   res.status(200).json({ message: "Simulasi OK (tidak disimpan)" });
+// });
 
 // DELETE data pasien
 app.delete("/data/delete/:id", (req, res) => {
@@ -129,13 +129,13 @@ const server = app.listen(PORT, () => {
   console.log(`Server berjalan di http://localhost:${PORT}`);
 });
 
-server.on("connection", (socket) => {
-  console.log("🔌 New connection");
+// server.on("connection", (socket) => {
+//   console.log("🔌 New connection");
 
-  socket.on("close", () => {
-    console.log("❌ Connection closed");
-  });
-});
+//   socket.on("close", () => {
+//     console.log("❌ Connection closed");
+//   });
+// });
 
 // app.maxConnections = 100;
 // server.setTimeout(30000); 
