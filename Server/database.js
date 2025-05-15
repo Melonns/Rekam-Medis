@@ -15,7 +15,7 @@
 //   }
 // };
 
-// const mysql = require('mysql2');
+const mysql = require('mysql2');
 
 // // Ganti dengan data dari Railway (lihat bagian "Connect" di plugin MySQL)
 const connection = mysql.createConnection({
