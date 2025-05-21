@@ -17,15 +17,6 @@
 
 const mysql = require('mysql2');
 require('dotenv').config();
-<<<<<<< Updated upstream
-// // Ganti dengan data dari Railway (lihat bagian "Connect" di plugin MySQL)
-const connection = mysql.createConnection({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT, // ganti dengan port dari Railway
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-=======
 
 // Parse DATABASE_URL dari .env
 const dbUrl = new URL(process.env.DATABASE_URL);
@@ -40,7 +31,6 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,       // jumlah maksimal koneksi bersamaan
   queueLimit: 0              // unlimited queue
->>>>>>> Stashed changes
 });
 
 module.exports = pool;
