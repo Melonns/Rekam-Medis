@@ -7,12 +7,14 @@ import Utama from './Utama'
 
 function App() {
     const [message, setMessage] = useState("");
+    const [showModal, setShowModal] = useState(false);
 
     return (
         <div className="bg-[#E5E7EB] min-h-screen flex flex-col overflow-x-hidden">
             <Header />
             <Utama />
         </div>
+        
     )
 }
 

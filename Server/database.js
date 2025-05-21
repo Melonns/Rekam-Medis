@@ -17,6 +17,7 @@
 
 const mysql = require('mysql2');
 require('dotenv').config();
+<<<<<<< Updated upstream
 // // Ganti dengan data dari Railway (lihat bagian "Connect" di plugin MySQL)
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -24,14 +25,22 @@ const connection = mysql.createConnection({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
+=======
+
+// Parse DATABASE_URL dari .env
+const dbUrl = new URL(process.env.DATABASE_URL);
+
+// Gunakan pool, bukan single connection
+const pool = mysql.createPool({
+  host: dbUrl.hostname,
+  port: dbUrl.port,
+  user: dbUrl.username,
+  password: dbUrl.password,
+  database: dbUrl.pathname.replace('/', ''),
+  waitForConnections: true,
+  connectionLimit: 10,       // jumlah maksimal koneksi bersamaan
+  queueLimit: 0              // unlimited queue
+>>>>>>> Stashed changes
 });
 
-connection.connect((err) => {
-  if (err) {
-    console.error('Koneksi gagal:', err.stack);
-    return;
-  }
-  console.log('Tersambung ke database dengan ID ' + connection.threadId);
-});
-
-module.exports = connection;
+module.exports = pool;

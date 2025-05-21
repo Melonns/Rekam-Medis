@@ -3,7 +3,7 @@ import './Card.css';
 
 const Card = ({id,nama, tanggal, deskripsi,onEdit,onDelete}) =>{
     return(
-        <div className="card">
+        <div className="flex justify-between items-center border border-gray-200 rounded-lg p-4 bg-gray-50">
             <div className="card-content">
                 <h2 className="text-2xl">{nama}</h2>
                 <p>{tanggal}</p>

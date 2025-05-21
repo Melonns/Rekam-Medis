@@ -4,10 +4,8 @@ const db = require("./database.js");
 const moment = require("moment");
 // const ratelimit = require("express-rate-limit");
 
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 
 // const limiter = ratelimit({
 //   windowMs: 1 * 60 * 1000, // 1 minute
@@ -36,24 +34,69 @@ app.use(express.json());
 // });
 // const dns = require('dns');
 
+
+
 // GET data pasien
 app.get("/data", (req, res) => {
-  const searchQuery = req.query.search;
+  const { search, tanggal } = req.query;
   let sqlQuery = "SELECT * FROM Pasien";
-
-  if (searchQuery) {
-    sqlQuery += ` WHERE nama LIKE '%${searchQuery}%'`;
-  } else {
-    const oneMonthAgo = moment().subtract(1, 'months').format("YYYY-MM-DD");
-    sqlQuery += ` WHERE tanggal >= '${oneMonthAgo}' ORDER BY tanggal DESC`;
+  let whereClause = [];
+  
+  // Filter berdasarkan nama
+  if (search) {
+    whereClause.push(`nama LIKE '%${search}%'`);
+    console.log("Tanggal:", search);
   }
-
+  
+  // Filter berdasarkan tanggal
+  if (tanggal) {
+    whereClause.push(`DATE(tanggal) = '${tanggal}'`);
+    
+  }
+  
+  // Kalau tidak ada filter, tampilkan data hari ini saja
+  if (!search && !tanggal) {
+    const today = moment().format("YYYY-MM-DD");
+    whereClause.push(`DATE(tanggal) = '${today}'`);
+  }
+  
+  // Gabungkan semua kondisi
+  if (whereClause.length > 0) {
+    sqlQuery += ` WHERE ${whereClause.join(" AND ")}`;
+  }
+  
+  sqlQuery += " ORDER BY tanggal DESC";
+  
   db.query(sqlQuery, (err, rows) => {
     if (err) {
       console.error("Query gagal:", err);
       return res.status(500).json({ error: "Gagal ambil data" });
     }
     res.json(rows);
+  });
+});
+
+
+app.get("/stats", (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', 0);
+  const today = moment().format("YYYY-MM-DD");
+
+  const totalQuery = "SELECT COUNT(*) AS total FROM Pasien";
+  const todayQuery = `SELECT COUNT(*) AS hari_ini FROM Pasien WHERE DATE(tanggal) = '${today}'`;
+
+  db.query(totalQuery, (err, totalResult) => {
+    if (err) return res.status(500).json({ error: "Gagal ambil total pasien" });
+
+    db.query(todayQuery, (err2, todayResult) => {
+      if (err2) return res.status(500).json({ error: "Gagal ambil pasien hari ini" });
+
+      res.json({
+        total: totalResult[0].total,
+        hari_ini: todayResult[0].hari_ini
+      });
+    });
   });
 });
 
@@ -71,10 +114,6 @@ app.post("/data", (req, res) => {
   });
 });
 
-
-
-
-
 // app.get('/resolve', (req, res) => {
 //   const domain = req.query.domain;
 
@@ -90,7 +129,6 @@ app.post("/data", (req, res) => {
 //     res.send(`Resolved IP for ${domain}: ${address}`);
 //   });
 // });
-
 
 // app.post("/data", (req, res) => {
 //   console.log("Simulasi POST diterima:", req.body);
@@ -139,4 +177,4 @@ const server = app.listen(PORT, () => {
 // });
 
 // app.maxConnections = 100;
-// server.setTimeout(30000); 
+// server.setTimeout(30000);
