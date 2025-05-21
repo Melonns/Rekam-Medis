@@ -17,13 +17,17 @@
 
 const mysql = require('mysql2');
 require('dotenv').config();
-// // Ganti dengan data dari Railway (lihat bagian "Connect" di plugin MySQL)
+const url = require('url');
+
+// Parse DATABASE_URL
+const dbUrl = new URL(process.env.DATABASE_URL);
+
 const connection = mysql.createConnection({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT, // ganti dengan port dari Railway
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
+  host: dbUrl.hostname,
+  port: dbUrl.port,
+  user: dbUrl.username,
+  password: dbUrl.password,
+  database: dbUrl.pathname.replace('/', ''),
 });
 
 connection.connect((err) => {
