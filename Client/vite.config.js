@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'serverrekammedis',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''), // ✅ HANYA ini yang perlu
       },
