@@ -2,20 +2,20 @@ const express = require("express");
 const cors = require("cors");
 const db = require("./database.js");
 const moment = require("moment");
-const ratelimit = require("express-rate-limit");
+// const ratelimit = require("express-rate-limit");
 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-const limiter = ratelimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: "Terlalu banyak permintaan, coba lagi nanti.",
-});
+// const limiter = ratelimit({
+//   windowMs: 1 * 60 * 1000, // 1 minute
+//   max: 100, // Limit each IP to 100 requests per windowMs
+//   message: "Terlalu banyak permintaan, coba lagi nanti.",
+// });
 
-app.use(limiter);
+// app.use(limiter);
 app.use(cors());
 app.use(express.json());
 
