@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'serverrekammedis',
+        target: 'https://serverrekammedis-production.up.railway.app/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''), // ✅ HANYA ini yang perlu
       },

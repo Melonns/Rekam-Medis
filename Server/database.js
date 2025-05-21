@@ -15,8 +15,8 @@
 //   }
 // };
 
-const mysql = require('mysql2');
 require('dotenv').config();
+const mysql = require('mysql2');
 
 // Parse DATABASE_URL dari .env
 const dbUrl = new URL(process.env.DATABASE_URL);
