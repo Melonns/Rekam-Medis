@@ -34,39 +34,103 @@ app.use(express.json());
 // });
 // const dns = require('dns');
 
+app.get("/pasien", (req, res) => {
+  const { search, tanggal } = req.query;
+  let query = `
+    SELECT p.*, GROUP_CONCAT(
+  IF(r.id IS NOT NULL, JSON_OBJECT(
+    'id', r.id,
+    'tanggal', r.tanggal,
+    'keluhan', r.keluhan,
+    'pemeriksaanfisik', r.pemeriksaanfisik,
+    'pemeriksaanlab', r.pemeriksaanlab,
+    'diagnosa', r.diagnosa,
+    'terapi', r.terapi,
+    'norekammedis', r.norekammedis
+  ), NULL)
+) AS rekamMedis
+    FROM pasien p
+    LEFT JOIN rekammedis r ON p.id = r.id_pasien
+  `;
 
+  const where = [];
+  const params = [];
+
+  if (search) {
+    where.push(`p.nama LIKE ?`);
+    params.push(`%${search}%`);
+  }
+
+  if (tanggal) {
+    where.push(`DATE(r.tanggal) = ?`);
+    params.push(tanggal);
+  }
+
+  if (where.length > 0) {
+    query += ` WHERE ` + where.join(" AND ");
+  }
+
+  query += ` GROUP BY p.id`;
+
+  db.query(query, params, (err, results) => {
+    if (err)
+      return res.status(500).json({ error: "Gagal ambil data", detail: err });
+
+    const parsed = results.map((row) => ({
+      ...row,
+      rekamMedis: row.rekamMedis ? JSON.parse("[" + row.rekamMedis + "]") : [],
+    }));
+
+    res.json(parsed);
+  });
+});
 
 // GET data pasien
 app.get("/data", (req, res) => {
   const { search, tanggal } = req.query;
-  let sqlQuery = "SELECT * FROM Pasien";
+  let sqlQuery = `
+    SELECT 
+      rm.id AS rekam_medis_id,
+      rm.tanggal,
+      rm.keluhan,
+      rm.pemeriksaanfisik,
+      rm.pemeriksaanlab,
+      rm.diagnosa,
+      rm.terapi,
+      rm.norekammedis,
+      p.id AS pasien_id,
+      p.nama,
+      p.tanggallahir,
+      p.alamat,
+      p.noHp
+    FROM RekamMedis rm
+    JOIN Pasien p ON rm.id_pasien = p.id
+  `;
+
   let whereClause = [];
-  
-  // Filter berdasarkan nama
+
+  // Filter berdasarkan nama pasien
   if (search) {
-    whereClause.push(`nama LIKE '%${search}%'`);
-    console.log("Tanggal:", search);
+    whereClause.push(`p.nama LIKE '%${search}%'`);
   }
-  
-  // Filter berdasarkan tanggal
+
+  // Filter berdasarkan tanggal rekam medis
   if (tanggal) {
-    whereClause.push(`DATE(tanggal) = '${tanggal}'`);
-    
+    whereClause.push(`DATE(rm.tanggal) = '${tanggal}'`);
   }
-  
-  // Kalau tidak ada filter, tampilkan data hari ini saja
+
+  // Jika tidak ada filter, default ke data hari ini
   if (!search && !tanggal) {
     const today = moment().format("YYYY-MM-DD");
-    whereClause.push(`DATE(tanggal) = '${today}'`);
+    whereClause.push(`DATE(rm.tanggal) = '${today}'`);
   }
-  
-  // Gabungkan semua kondisi
+
   if (whereClause.length > 0) {
     sqlQuery += ` WHERE ${whereClause.join(" AND ")}`;
   }
-  
-  sqlQuery += " ORDER BY tanggal DESC";
-  
+
+  sqlQuery += ` ORDER BY rm.tanggal DESC`;
+
   db.query(sqlQuery, (err, rows) => {
     if (err) {
       console.error("Query gagal:", err);
@@ -76,25 +140,27 @@ app.get("/data", (req, res) => {
   });
 });
 
-
 app.get("/stats", (req, res) => {
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', 0);
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", 0);
+
   const today = moment().format("YYYY-MM-DD");
 
-  const totalQuery = "SELECT COUNT(*) AS total FROM Pasien";
-  const todayQuery = `SELECT COUNT(*) AS hari_ini FROM Pasien WHERE DATE(tanggal) = '${today}'`;
+  const totalQuery = "SELECT COUNT(*) AS total FROM pasien";
+  const todayQuery = `SELECT COUNT(*) AS hari_ini FROM rekammedis WHERE DATE(tanggal) = '${today}'`;
 
   db.query(totalQuery, (err, totalResult) => {
-    if (err) return res.status(500).json({ error: "Gagal ambil total pasien" });
+    if (err)
+      return res.status(500).json({ error: "Gagal ambil total rekam medis" });
 
     db.query(todayQuery, (err2, todayResult) => {
-      if (err2) return res.status(500).json({ error: "Gagal ambil pasien hari ini" });
+      if (err2)
+        return res.status(500).json({ error: "Gagal ambil data hari ini" });
 
       res.json({
         total: totalResult[0].total,
-        hari_ini: todayResult[0].hari_ini
+        hari_ini: todayResult[0].hari_ini,
       });
     });
   });
@@ -102,41 +168,75 @@ app.get("/stats", (req, res) => {
 
 // POST data pasien
 app.post("/data", (req, res) => {
-  const { nama, tanggal, deskripsi } = req.body;
-  const sqlQuery = `INSERT INTO Pasien (nama, tanggal, deskripsi) VALUES ('${nama}', '${tanggal}', '${deskripsi}')`;
+  const {
+    id_pasien,
+    tanggal,
+    keluhan,
+    pemeriksaanfisik,
+    pemeriksaanlab,
+    diagnosa,
+    terapi,
+    norekammedis,
+  } = req.body;
 
-  db.query(sqlQuery, (err) => {
-    if (err) {
-      console.error("Gagal menyimpan data:", err);
-      return res.status(500).json({ error: "Gagal menyimpan data" });
+  const sqlQuery = `
+    INSERT INTO RekamMedis 
+      (id_pasien, tanggal, keluhan, pemeriksaanfisik, pemeriksaanlab, diagnosa, terapi, norekammedis)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    sqlQuery,
+    [
+      id_pasien,
+      tanggal,
+      keluhan || null,
+      pemeriksaanfisik || null,
+      pemeriksaanlab || null,
+      diagnosa || null,
+      terapi || null,
+      norekammedis,
+    ],
+    (err) => {
+      if (err) {
+        console.error("Gagal menyimpan data rekam medis:", err);
+        return res
+          .status(500)
+          .json({ error: "Gagal menyimpan data rekam medis" });
+      }
+      res.status(201).json({ message: "Rekam medis berhasil disimpan" });
     }
-    res.status(201).json({ message: "Data berhasil disimpan" });
+  );
+});
+
+app.post("/pasien", (req, res) => {
+  const { nama, tanggallahir, alamat, noHp } = req.body;
+
+  // Validasi sederhana
+  if (!nama || !tanggallahir || !alamat || !noHp) {
+    return res.status(400).json({ error: "Semua field harus diisi" });
+  }
+
+  const sqlQuery = `
+    INSERT INTO Pasien (nama, tanggallahir, alamat, noHp)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  db.query(sqlQuery, [nama, tanggallahir, alamat, noHp], (err, result) => {
+    if (err) {
+      console.error("Gagal menyimpan data pasien:", err);
+      return res.status(500).json({ error: "Gagal menyimpan data pasien" });
+    }
+
+    res.status(201).json({
+      message: "Pasien berhasil ditambahkan",
+      pasien_id: result.insertId,
+    });
   });
 });
 
-// app.get('/resolve', (req, res) => {
-//   const domain = req.query.domain;
-
-//   if (!domain) {
-//     return res.status(400).send("Missing domain");
-//   }
-
-//   dns.lookup(domain, (err, address, family) => {
-//     if (err) {
-//       // console.error("Failed to resolve:", domain);
-//       return res.status(500).send("DNS resolution failed");
-//     }
-//     res.send(`Resolved IP for ${domain}: ${address}`);
-//   });
-// });
-
-// app.post("/data", (req, res) => {
-//   console.log("Simulasi POST diterima:", req.body);
-//   res.status(200).json({ message: "Simulasi OK (tidak disimpan)" });
-// });
-
 // DELETE data pasien
-app.delete("/data/delete/:id", (req, res) => {
+app.delete("/pasien/:id", (req, res) => {
   const id = req.params.id;
   const sqlQuery = `DELETE FROM Pasien WHERE id = ${id}`;
 
@@ -149,32 +249,71 @@ app.delete("/data/delete/:id", (req, res) => {
   });
 });
 
-app.put("/data/edit/:id", (req, res) => {
+app.delete("/data/:id", (req, res) => {
   const id = req.params.id;
-  const { nama, tanggal, deskripsi } = req.body;
-  const sqlQuery = `UPDATE Pasien SET nama = '${nama}', tanggal = '${tanggal}', deskripsi = '${deskripsi}' WHERE id = ${id}`;
+  const sqlQuery = `DELETE FROM rekammedis WHERE id = ${id}`;
 
   db.query(sqlQuery, (err) => {
     if (err) {
-      console.error("Gagal memperbarui data:", err);
-      return res.status(500).json({ error: "Gagal memperbarui data" });
+      console.error("Gagal menghapus data:", err);
+      return res.status(500).json({ error: "Gagal menghapus data" });
     }
-    res.status(200).json({ message: "Data berhasil diperbarui" });
+    res.status(200).json({ message: "Data berhasil dihapus" });
   });
+});
+
+app.put("/data/:id", (req, res) => {
+  const id = req.params.id;
+  const {
+    tanggal,
+    keluhan,
+    pemeriksaanfisik,
+    pemeriksaanlab,
+    diagnosa,
+    terapi,
+    norekammedis,
+  } = req.body;
+
+  const sqlQuery = `
+    UPDATE RekamMedis SET 
+      tanggal = ?, 
+      keluhan = ?, 
+      pemeriksaanfisik = ?, 
+      pemeriksaanlab = ?, 
+      diagnosa = ?, 
+      terapi = ?, 
+      norekammedis = ?
+    WHERE id = ?
+  `;
+
+  db.query(
+    sqlQuery,
+    [
+      tanggal,
+      keluhan || null,
+      pemeriksaanfisik || null,
+      pemeriksaanlab || null,
+      diagnosa,
+      terapi,
+      norekammedis,
+      id,
+    ],
+    (err) => {
+      if (err) {
+        console.error("Gagal memperbarui data rekam medis:", err);
+        return res
+          .status(500)
+          .json({ error: "Gagal memperbarui data rekam medis" });
+      }
+      res.status(200).json({ message: "Rekam medis berhasil diperbarui" });
+    }
+  );
 });
 
 // Start server
 const server = app.listen(PORT, () => {
   console.log(`Server berjalan di http://localhost:${PORT}`);
 });
-
-// server.on("connection", (socket) => {
-//   console.log("🔌 New connection");
-
-//   socket.on("close", () => {
-//     console.log("❌ Connection closed");
-//   });
-// });
 
 // app.maxConnections = 100;
 // server.setTimeout(30000);
