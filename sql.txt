@@ -1,0 +1,25 @@
+CREATE TABLE pasien (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  nama VARCHAR(100) NOT NULL,
+  tanggallahir DATE NOT NULL,
+  alamat VARCHAR(100) NOT NULL,
+  noHp VARCHAR(100) NOT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE rekammedis (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  id_pasien INT(11) NOT NULL,
+  keluhan TEXT,
+  pemeriksaanfisik TEXT,
+  pemeriksaanlab TEXT,
+  diagnosa TEXT,
+  terapi TEXT,
+  tanggal DATE NOT NULL DEFAULT CURDATE(),
+  norekammedis VARCHAR(50),
+  PRIMARY KEY (id),
+  FOREIGN KEY (id_pasien) REFERENCES pasien(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
