@@ -688,39 +688,6 @@ function Utama() {
         </div>
       </div>
 
-      {/* Form Add Pasien
-      <div>
-        <h3 className="mb-2 ">Tambah Pasien</h3>
-        <input
-          className="border-solid border-2 border-gray-300 rounded-md p-2 mr-4"
-          type="text"
-          name="nama"
-          placeholder="Nama Pasien"
-          value={newPasien.nama}
-          onChange={handleAddPasienChange}
-        />
-        <input
-          className="border-solid border-2 border-gray-300 rounded-md p-2 mr-4"
-          type="date"
-          name="tanggal"
-          value={newPasien.tanggal}
-          onChange={handleAddPasienChange}
-        />
-        <textarea
-          className="border border-gray-300 rounded-md p-2 h-[40px] mt-2 w-full resize-none"
-          name="deskripsi"
-          placeholder="Deskripsi"
-          value={newPasien.deskripsi}
-          onChange={handleAddPasienChange}
-        />
-        <button
-          className="bg-[#10B981] border-solid border-2 border-gray-500 rounded-md p-2"
-          onClick={handleAddPasien}
-        >
-          Tambah Pasien
-        </button>
-      </div> */}
-
       {/* Form Edit Data */}
       {editData && (
         <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
